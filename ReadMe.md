@@ -23,7 +23,7 @@ https://github.com/DDTRobot/webots2023b_ros2_docker
 
 ```bash 
 #本仓库
-git clone https://github.com/DDTRobot/sim2sim2real.git
+git clone https://github.com/DDTRobot/tita_rl_sim2sim2real.git
 
 cd sim2sim2real
 
