@@ -1,0 +1,10 @@
+# FSMState_RL runtime config
+# You can override this file path with env: TITA_RL_CONFIG=/abs/path/to/rl_runtime.yaml
+
+engine_path: /home/raise/Workspaces/tita_rl_sim2sim2real/src/tita_locomotion/engine/policy.engine
+
+# run() gains
+leg_kp: 40.0
+leg_kd: 2.5
+wheel_kp: 0.0
+wheel_kd: 5.0
