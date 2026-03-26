@@ -2,6 +2,6 @@
 /install
 /log
 /build
-
+.vscode/
 # 排除 src 文件夹
 !src/
