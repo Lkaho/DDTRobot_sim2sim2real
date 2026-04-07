@@ -1,7 +1,7 @@
 # FSMState_RL runtime config
 # You can override this file path with env: TITA_RL_CONFIG=/abs/path/to/rl_runtime.yaml
 
-engine_path: /home/raise/Workspaces/tita_rl_sim2sim2real/src/tita_locomotion/engine/policy_stair_v2.engine
+engine_path: /home/raise/Workspaces/tita_rl_sim2sim2real/src/tita_locomotion/engine/policy_estVel.engine
 heading_control_stiffness: 0.5
 heading_ang_vel_min: -0.5
 heading_ang_vel_max: 0.5
@@ -10,6 +10,6 @@ observation_terms: [base_ang_vel, projected_gravity, velocity_commands, joint_po
 
 # run() gains
 leg_kp: 40.0
-leg_kd: 1.0
+leg_kd: 2.5
 wheel_kp: 0.0
-wheel_kd: 0.5
+wheel_kd: 5.0

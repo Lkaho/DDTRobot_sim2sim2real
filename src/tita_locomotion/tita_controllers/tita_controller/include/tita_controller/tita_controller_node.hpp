@@ -95,11 +95,13 @@ protected:
   void posestamped_cb(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
   void fsm_goal_cb(const std_msgs::msg::String::SharedPtr msg);
   void joy_cb(const sensor_msgs::msg::Joy::SharedPtr msg);
+  void gps_speed_vector_cb(const geometry_msgs::msg::Vector3::SharedPtr msg);
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscription_;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr posestamped_subscription_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr fsm_goal_subscription_;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscription_;
+  rclcpp::Subscription<geometry_msgs::msg::Vector3>::SharedPtr gps_speed_vector_subscription_;
   sensor_msgs::msg::Joy::SharedPtr joy_msg_ = nullptr;
 
 protected:
@@ -131,10 +133,13 @@ protected:  // TODO:
   void lqr_loop_thread();
   std::thread /*main_thread_, */ lqr_thread_;
   std::atomic<bool> /*main_thread_running_{false}, */ lqr_thread_running_{false};
+  std::atomic<bool> has_gps_speed_vector_{false};
   std::mutex mutex_;
   std::mutex cmd_vel_mutex_, pose_stamped_mutex_, fsm_goal_mutex_, joy_mutex_, rigid_body_mutex_;
+  std::mutex gps_speed_vector_mutex_;
   benchmark::RepeatedTimer mpcTimer_;
   benchmark::RepeatedTimer wbcTimer_;
+  Vec3<double> gps_speed_vector_world_ = Vec3<double>::Zero();
 };
 
 }  // namespace tita_locomotion

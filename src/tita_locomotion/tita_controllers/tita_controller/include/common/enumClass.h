@@ -114,6 +114,24 @@ struct WheelLeggedData
 */
 struct StateEstimate
 {
+  StateEstimate()
+  {
+    contactEstimate.setZero();
+    position.setZero();
+    vBody.setZero();
+    orientation << 1.0, 0.0, 0.0, 0.0;
+    omegaBody.setZero();
+    rBody.setIdentity();
+    rpy.setZero();
+    omegaWorld.setZero();
+    vWorld.setZero();
+    aBody.setZero();
+    aWorld.setZero();
+    rCtrl.setIdentity();
+    omegaCtrl.setZero();
+    vCtrl.setZero();
+    aCtrl.setZero();
+  }
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Vec4<double> contactEstimate;
   Vec3<double> position;

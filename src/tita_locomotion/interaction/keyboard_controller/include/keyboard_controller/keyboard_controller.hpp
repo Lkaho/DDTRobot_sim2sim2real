@@ -51,6 +51,7 @@ private:
   }
   void print_interface();
   int get_key();
+  void UpdatePoseOrientationFromRpy();
 
   void ReadKeyThread();
   void PubCmdVelCallBack();

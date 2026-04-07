@@ -14,7 +14,7 @@
 import os
 from launch import LaunchDescription, LaunchContext
 from ament_index_python.packages import get_package_share_directory
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, SetEnvironmentVariable
 from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import IfCondition, UnlessCondition
@@ -43,9 +43,21 @@ def generate_launch_description():
             description="Select wheel-legged robot control methods, mcu means on mcu-board control",
         )
     )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "rl_config",
+            default_value="",
+            description="Optional absolute path to RL runtime yaml. Empty uses the controller default runtime config.",
+        )
+    )
 
     urdf = "robot.xacro"
     yaml_path = "locomotion_bringup"
+    rl_config_env = SetEnvironmentVariable(
+        name="TITA_RL_CONFIG",
+        value=LaunchConfiguration("rl_config"),
+    )
+
     # launch webots bridge
     webots_controller_manager_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
@@ -57,6 +69,7 @@ def generate_launch_description():
             'ctrl_mode': LaunchConfiguration('ctrl_mode'),
             'urdf': urdf,
             'yaml_path': yaml_path,
+            'rl_config': LaunchConfiguration('rl_config'),
         }.items(),
         condition=IfCondition(PythonExpression(["'", LaunchConfiguration('sim_env'), "' == 'webots'"]))
     )
@@ -104,6 +117,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription(declared_arguments + [
+        rl_config_env,
         webots_controller_manager_launch,
         # gazebo_controller_manager_launch,
 

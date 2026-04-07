@@ -1,5 +1,10 @@
 #include "keyboard_controller/keyboard_controller.hpp"
 
+namespace
+{
+constexpr double kSpawnHeadingRad = 0.0;
+}
+
 KeyboardControllerNode::KeyboardControllerNode(const rclcpp::NodeOptions & options) : Node("keyboard_controller", options)
 {
   this->cmd_vel_publisher_ =
@@ -26,21 +31,38 @@ KeyboardControllerNode::KeyboardControllerNode(const rclcpp::NodeOptions & optio
   for (size_t i = 0; i < 3; i++) {
     rpy_[i] = 0.0;
   }
+  rpy_[2] = kSpawnHeadingRad;
+  UpdatePoseOrientationFromRpy();
   fsm_goal_.data = "idle";
   print_interface();
 }
+void KeyboardControllerNode::UpdatePoseOrientationFromRpy()
+{
+  tf2::Quaternion q;
+  q.setRPY(rpy_[0], rpy_[1], rpy_[2]);
+  pose_.pose.orientation.x = q.x();
+  pose_.pose.orientation.y = q.y();
+  pose_.pose.orientation.z = q.z();
+  pose_.pose.orientation.w = q.w();
+}
+
 void KeyboardControllerNode::print_interface()
 {
   system("clear");
   std::cout << R"(
   -------------------------------------------------------
                     State Machines
-  0: passive 1: transform up 2 balance 3: transform down 4: rl
+  0: passive 1: transform up 2: rl 3: transform down
   -------------------------------------------------------
-  Moving Around    Postion Control    Orientation Control                                       
-        w                 ↑                u i o                                               
-      a s d             ←   →              j k l                                 
-        x                 ↓                  ,                              
+  Moving Around    Postion Control    Orientation Control
+        w                 ↑                u i o
+      a s d             ←   →              j k l
+        x                 ↓                  ,
+  -------------------------------------------------------
+   RL Heading Command
+      q   : increase heading target
+      e   : decrease heading target
+      c   : clear heading target
   -------------------------------------------------------
              Speed Scale        Pose Scale  
             + : increase       * : increase 
@@ -56,7 +78,8 @@ void KeyboardControllerNode::print_interface()
             << std::endl;
   std::cout << "  x vel:" << std::setw(6) << MAGENTA << twist_.linear.x << RESET
             << "  y vel:" << std::setw(6) << MAGENTA << twist_.linear.y << RESET
-            << "  z vel:" << std::setw(6) << MAGENTA << twist_.angular.z << RESET << std::endl;
+            << "  z vel:" << std::setw(6) << MAGENTA << twist_.angular.z << RESET
+            << "  heading:" << std::setw(6) << MAGENTA << rpy_[2] << RESET << std::endl;
 
   // std::cout << "  pitch:" << std::setw(6) << CYAN << rpy_[0] << RESET << "   roll:" << std::setw(6)
   //           << CYAN << rpy_[1] << RESET << "   yaw: " << std::setw(6) << CYAN << rpy_[2] << RESET
@@ -117,6 +140,15 @@ void KeyboardControllerNode::ReadKeyThread()
         break;
       case 'd':
         twist_.angular.z -= STEP_ACCL_W * speed_scale_;
+        break;
+      case 'q':
+        rpy_[2] += STEP_ORIENTATION * pose_scale_;
+        break;
+      case 'e':
+        rpy_[2] -= STEP_ORIENTATION * pose_scale_;
+        break;
+      case 'c':
+        rpy_[2] = 0.0;
         break;
       case 's':
         twist_.linear.x = 0.0;
@@ -192,12 +224,7 @@ void KeyboardControllerNode::ReadKeyThread()
     for (size_t i = 0; i < 3; i++) {
       rpy_[i] = clamp(rpy_[i], -MAX_ORIENTATION, MAX_ORIENTATION);
     }
-    tf2::Quaternion q;
-    q.setRPY(rpy_[0], rpy_[1], rpy_[2]);
-    pose_.pose.orientation.x = q.x();
-    pose_.pose.orientation.y = q.y();
-    pose_.pose.orientation.z = q.z();
-    pose_.pose.orientation.w = q.w();
+    UpdatePoseOrientationFromRpy();
     pose_.pose.position.y = clamp(pose_.pose.position.y, -MAX_POSITION, MAX_POSITION);
     pose_.pose.position.z = clamp(pose_.pose.position.z, MIN_HEIGHT, MAX_HEIGHT);
     print_interface();

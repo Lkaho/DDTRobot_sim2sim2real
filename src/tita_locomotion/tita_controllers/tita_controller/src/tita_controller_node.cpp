@@ -74,6 +74,9 @@ controller_interface::CallbackReturn TitaController::on_configure(
   joy_subscription_ = get_node()->create_subscription<sensor_msgs::msg::Joy>(
     tita_topic::teleop_command, subscribers_qos,
     std::bind(&TitaController::joy_cb, this, std::placeholders::_1));
+  gps_speed_vector_subscription_ = get_node()->create_subscription<geometry_msgs::msg::Vector3>(
+    "tita_webots/gps/speed_vector", subscribers_qos,
+    std::bind(&TitaController::gps_speed_vector_cb, this, std::placeholders::_1));
 
   plan_commands_publisher_ = get_node()->create_publisher<locomotion_msgs::msg::PlanCommands>(
     "~/plan_commands", rclcpp::SystemDefaultsQoS());
@@ -146,6 +149,18 @@ controller_interface::return_type TitaController::update(
     controlData_->state_estimator->run();
   else
     init_estimator_count_++;
+
+  if (has_gps_speed_vector_.load()) {
+    Vec3<double> gps_speed_vector_world = Vec3<double>::Zero();
+    {
+      std::lock_guard<std::mutex> lock(gps_speed_vector_mutex_);
+      gps_speed_vector_world = gps_speed_vector_world_;
+    }
+
+    controlData_->state_estimate->vWorld = gps_speed_vector_world;
+    controlData_->state_estimate->vBody =
+      controlData_->state_estimate->rBody * gps_speed_vector_world;
+  }
   // controlData_->pinocchio_model->updateState();
   controlData_->state_command->convertFSMState();
   FSMController_->run();
@@ -378,6 +393,13 @@ void TitaController::joy_cb(const sensor_msgs::msg::Joy::SharedPtr msg)
     }
     *joy_msg_ = std::move(*msg);
   }
+}
+
+void TitaController::gps_speed_vector_cb(const geometry_msgs::msg::Vector3::SharedPtr msg)
+{
+  std::lock_guard<std::mutex> lock(gps_speed_vector_mutex_);
+  gps_speed_vector_world_ << msg->x, msg->y, msg->z;
+  has_gps_speed_vector_.store(true);
 }
 
 void TitaController::plan_commands_cb()
