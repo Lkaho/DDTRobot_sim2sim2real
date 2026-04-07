@@ -6,6 +6,11 @@
 <p align="center">
     语言：<a href="./docs/docs_en/README_EN.md"><strong>English</strong></a> / <strong>中文</strong>
 </p>
+
+## Demo
+
+![Tita Stair Climbing](../../pictures/Tita_StairClimbing.gif)
+
 ​
 机器人运动控制管理。主要分为以下4个模块:
 

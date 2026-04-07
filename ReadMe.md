@@ -9,6 +9,10 @@ TITA 轮腿机器人 `IsaacLab -> TensorRT -> Webots/ROS2` 的部署与验证仓
 
 持续更新中，欢迎提 Issue 交流。
 
+## Demo
+
+![Tita Stair Climbing](./pictures/Tita_StairClimbing.gif)
+
 ## 1. 仓库结构
 
 - `src/tita_locomotion`: 机器人 ROS 2 控制、Webots bridge、键盘控制
